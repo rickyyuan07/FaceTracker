@@ -36,7 +36,9 @@ def download_youtube_video(video_url, output_folder="sample_data"):
 
 if __name__ == "__main__":
     # Example YouTube URL (replace with the video you want to download)
-    video_url = "https://www.youtube.com/watch?v=6Af6b_wyiwI"
+    # video_url = "https://www.youtube.com/watch?v=3iMc8uF46C0"
+    # video_url = "https://www.youtube.com/watch?v=lXLBTBBil2U"
+    video_url = "https://www.youtube.com/watch?v=EOZYI3F1g7c"
 
     # Call the download function
     download_youtube_video(video_url)
