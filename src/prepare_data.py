@@ -1,14 +1,16 @@
 import os
 from pytubefix import YouTube
 from moviepy.video.io.VideoFileClip import VideoFileClip
+from moviepy.audio.io.AudioFileClip import AudioFileClip
 
-def download_youtube_video(video_url, output_folder="sample_data"):
+def download_youtube_video(video_url, output_folder="sample_data", video_only=False):
     """
     Downloads a YouTube video to the specified output folder.
 
     Args:
         video_url (str): The URL of the YouTube video to download.
-        output_folder (str): The folder where the video will be saved (default: "sample_data").
+        output_folder (str): The folder where the video or audio will be saved (default: "sample_data").
+        video_only (bool): If True, only the video will be downloaded (default: False).
 
     Returns:
         str: The file path of the downloaded video.
@@ -19,11 +21,32 @@ def download_youtube_video(video_url, output_folder="sample_data"):
 
         yt = YouTube(video_url, 'WEB')
 
-        stream = yt.streams.get_highest_resolution()
+        if video_only:
+            print(f"Downloading video: {yt.title}")
+            stream = yt.streams.filter(progressive=False, file_extension="mp4").order_by("resolution").desc().first()
+            file_path = stream.download(output_folder)
+            print(f"Downloaded successfully: {file_path}")
+        else:
+            # Download the highest quality video + audio
+            video_stream = yt.streams.filter(only_video=True, file_extension="mp4").order_by("resolution").desc().first()
+            video_path = video_stream.download(output_folder, filename=f"{yt.title}_vid_tmp.mp4")
 
-        print(f"Downloading video: {yt.title}")
-        file_path = stream.download(output_folder)
-        print(f"Video downloaded successfully: {file_path}")
+            audio_stream = yt.streams.filter(only_audio=True, file_extension="mp4").first()
+            audio_path = audio_stream.download(output_folder, filename=f"{yt.title}_aud_tmp.mp4")
+
+            # Combine video and audio
+            video_clip = VideoFileClip(video_path)
+            audio_clip = AudioFileClip(audio_path)
+            video_clip.audio = audio_clip
+            file_path = os.path.join(output_folder, f"{yt.title}.mp4")
+
+            video_clip.write_videofile(file_path, codec="libx264", audio_codec="aac")
+
+            video_clip.close()
+            audio_clip.close()
+            # os.remove(video_path)
+            # os.remove(audio_path)
+            print(f"Downloaded and combined successfully: {file_path}")
 
         return file_path
 
