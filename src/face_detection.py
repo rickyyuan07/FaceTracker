@@ -1,18 +1,20 @@
 import cv2
 import os
+import json
 
 def detect_faces_in_video(video_path, output_folder="output", cascade_path="haarcascade_frontalface_default.xml"):
     """
-    Perform face detection on a video and save the processed video with bounding boxes.
+    Perform face detection on a video, save the processed video with bounding boxes, 
+    and generate a JSON file with frame-wise face coordinates.
 
     Args:
         video_path (str): Path to the input video file.
-        output_folder (str): Folder to save the output video.
+        output_folder (str): Folder to save the output video and JSON file.
         cascade_path (str): Path to the Haar Cascade XML file for face detection.
     """
     # Load the Haar cascade for face detection
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + cascade_path)
-    
+
     # Open the video file
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -33,6 +35,12 @@ def detect_faces_in_video(video_path, output_folder="output", cascade_path="haar
     output_video_path = os.path.join(output_folder, "output_with_faces.mp4")
     out = cv2.VideoWriter(output_video_path, fourcc, fps, (frame_width, frame_height))
 
+    # JSON file path
+    json_file_path = os.path.join(output_folder, "face_coordinates.json")
+    face_data = []  # List to store face detection data
+
+    frame_count = 0
+
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -42,11 +50,18 @@ def detect_faces_in_video(video_path, output_folder="output", cascade_path="haar
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         # Detect faces
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.05, minNeighbors=5, minSize=(30, 30))
 
-        # Draw bounding boxes around detected faces
+        # Store face data for the current frame
+        frame_faces = []
         for (x, y, w, h) in faces:
+            frame_faces.append({"x": int(x), "y": int(y), "width": int(w), "height": int(h)})
+            # Draw bounding boxes around detected faces
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+
+        # Append frame data to face_data
+        face_data.append({"frame": frame_count, "faces": frame_faces})
+        frame_count += 1
 
         # Write the processed frame to the output video
         out.write(frame)
@@ -61,11 +76,16 @@ def detect_faces_in_video(video_path, output_folder="output", cascade_path="haar
     out.release()
     cv2.destroyAllWindows()
 
+    # Save face data to JSON file
+    with open(json_file_path, "w") as json_file:
+        json.dump(face_data, json_file, indent=4)
+
     print(f"Face detection complete. Processed video saved at: {output_video_path}")
+    print(f"Face data saved to JSON file: {json_file_path}")
 
 if __name__ == "__main__":
     # Input video path (replace with your video file path)
-    video_path = "./sample_data/Nvidia CEO Huang New Chips, AI, Musk, Meeting Trump.mp4"
+    video_path = "./sample_data/simon_easy1.mp4"
 
     # Perform face detection
     detect_faces_in_video(video_path)
