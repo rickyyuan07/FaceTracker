@@ -6,6 +6,7 @@ Take-home project for interviewing with HeyGen.
 FaceTracker is a tool designed to detect, track, and crop a specific target face from a video. The tool extracts exact video clips of the target face, along with metadata, including timestamps and face bounding box coordinates for each frame.
 
 ## Installation
+This project is tested under WSL2, Ubuntu 22.04, and Python 3.10, NVIDIA RTX 3060 Ti. The CUDA vision is 12.6, and the CUDNN version is 9.7.0.
 To set up the project, follow these steps:
 
 1. Clone the repository:
@@ -31,7 +32,7 @@ Run
 python prepare_data.py
 ```
 
-to download sample youtube videos.
+if you want to download youtube videos other than the sample videos in `/sample_data/`. This scripts downloads the highest quality Youtube Video, and the audio of the video, and combines them into a single video file. After that, it crops the video into a predefined length, and saves the cropped video into the `sample_data` folder. Please look into the script and modify if you want to test on different videos.
 
 ### Data for Testing
 Sample videos are categorized based on difficulty:
