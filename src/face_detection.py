@@ -2,20 +2,29 @@ import cv2
 import os
 import json
 import argparse
+from retinaface import RetinaFace
 
-def detect_faces_in_video(video_path, output_folder="output", cascade_path="haarcascade_frontalface_default.xml", debug=False):
+def detect_faces_in_video(video_path, output_folder="output", cascade_path="haarcascade_frontalface_default.xml", algorithm="haar", debug=False):
     """
-    Perform face detection on a video, save the processed video with bounding boxes,
+    Perform face detection on a video using the specified algorithm, save the processed video with bounding boxes,
     and generate a JSON file with frame-wise face coordinates.
 
     Args:
         video_path (str): Path to the input video file.
         output_folder (str): Folder to save the output video and JSON file.
-        cascade_path (str): Path to the Haar Cascade XML file for face detection.
+        cascade_path (str): Path to the Haar Cascade XML file for face detection (used with Haar algorithm).
+        algorithm (str): The face detection algorithm to use ("haar" or "retinaface").
         debug (bool): If True, visualize face detection during processing.
     """
-    # Load the Haar cascade for face detection
-    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + cascade_path)
+    # Initialize the chosen face detection algorithm
+    if algorithm == "haar":
+        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + cascade_path)
+        print("Using Haar Cascade for face detection.")
+    elif algorithm == "retinaface":
+        print("Using RetinaFace for face detection.")
+    else:
+        print("Error: Unsupported algorithm. Choose 'haar' or 'retinaface'.")
+        return
 
     # Open the video file
     cap = cv2.VideoCapture(video_path)
@@ -48,19 +57,28 @@ def detect_faces_in_video(video_path, output_folder="output", cascade_path="haar
         if not ret:
             break
 
-        # Convert to grayscale for face detection
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-        # Detect faces
-        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.05, minNeighbors=5, minSize=(30, 30))
-
-        # Store face data for the current frame
         frame_faces = []
-        for (x, y, w, h) in faces:
-            frame_faces.append({"x": int(x), "y": int(y), "width": int(w), "height": int(h)})
-            # Draw bounding boxes around detected faces if debug mode is enabled
-            if debug:
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+
+        if algorithm == "haar":
+            # Convert to grayscale for Haar Cascade face detection
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+            # Detect faces using Haar Cascade
+            faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+            for (x, y, w, h) in faces:
+                frame_faces.append({"x": int(x), "y": int(y), "width": int(w), "height": int(h)})
+                if debug:
+                    cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+
+        elif algorithm == "retinaface":
+            # Detect faces using RetinaFace
+            detections = RetinaFace.detect_faces(frame)
+            for key in detections:
+                face = detections[key]['facial_area']
+                x, y, x1, y1 = face
+                frame_faces.append({"x": int(x), "y": int(y), "width": int(x1 - x), "height": int(y1 - y)})
+                if debug:
+                    cv2.rectangle(frame, (x, y), (x1, y1), (0, 255, 0), 2)
 
         face_data.append({"frame": frame_count, "faces": frame_faces})
         frame_count += 1
@@ -89,6 +107,7 @@ if __name__ == "__main__":
     parser.add_argument("--video_path", type=str, help="Path to the input video file.")
     parser.add_argument("--output_folder", type=str, default="output", help="Folder to save the output video and JSON file.")
     parser.add_argument("--cascade_path", type=str, default="haarcascade_frontalface_default.xml", help="Path to the Haar Cascade XML file.")
+    parser.add_argument("--algorithm", type=str, default="haar", choices=["haar", "retinaface"], help="Face detection algorithm to use ('haar' or 'retinaface').")
     parser.add_argument("--debug", action="store_true", help="Enable debug mode to visualize face detection.")
 
     args = parser.parse_args()
@@ -97,5 +116,6 @@ if __name__ == "__main__":
         video_path=args.video_path,
         output_folder=args.output_folder,
         cascade_path=args.cascade_path,
+        algorithm=args.algorithm,
         debug=args.debug
     )
