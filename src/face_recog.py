@@ -60,7 +60,7 @@ def save_video(video_path, segment, output_path, fps):
 
     video_capture = cv2.VideoCapture(video_path)
 
-    for frame_index, (x, y, w, h) in segment:
+    for frame_index, (x, y, w, h) in tqdm(segment, desc="Saving video segment"):
         video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
         ret, frame = video_capture.read()
         if ret:
@@ -82,7 +82,7 @@ def save_video_with_audio(video_path, segment, output_path, fps):
 
     video_capture = cv2.VideoCapture(video_path)
 
-    for frame_index, (x, y, w, h) in segment:
+    for frame_index, (x, y, w, h) in tqdm(segment, desc="Saving video segment"):
         video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
         ret, frame = video_capture.read()
         if ret:

@@ -40,17 +40,17 @@ Sample videos are categorized based on difficulty:
 - **Hard:** A moving camera scenario, such as a TED Talk video.
 
 ## Usage
-To run the face tracking tool, use the following commands:
+The To run the face tracking tool, use the following commands:
 
 1. Perform face detection, it would generate a json file containing the coordinates of the detected face(s) in each frame.:
 
 ```bash
-python src/face_detection.py --video_path <path_to_video> --output_folder <path_to_save_output> --debug --algorithm <algorithm_name>
+python src/face_detection.py --video_path <path_to_video> --output_folder <path_to_save_output> --algorithm <algorithm_name> --debug
 ```
 
 Example:
 ```bash
-python src/face_detection.py --video_path ./sample_data/jensen_medium1.mp4 --output_folder ./output --debug --algorithm retinaface
+python src/face_detection.py --video_path ./sample_data/jensen_medium1.mp4 --output_folder ./output/jensen_medium1 --algorithm retinaface
 ```
 
 2. Perform face recognition, it would generate a video containing the target face only, and a json file containing the metadata of the cropped video.:
@@ -60,23 +60,26 @@ python src/face_recog.py --video_path <path_to_video> --face_coordinates_path <p
 
 Example:
 ```bash
-python src/face_recog.py --video_path ./sample_data/jensen_medium1.mp4 --face_coordinates_path ./output/face_coordinates.json --reference_image_path ./sample_data/jensen_huang.png --output_dir ./output/videos/ --debug
+python src/face_recog.py --video_path ./sample_data/jensen_medium1.mp4 --face_coordinates_path ./output/jensen_medium1/face_coordinates.json --reference_image_path ./sample_data/jensen_huang.png --output_dir ./output/jensen_medium1/videos/
 ```
 
 ## Future Work
 - **Real-time performance:** Improve the tracker's performance to process videos in real-time.
-   - GPU acceleration for both face detection and recognition.
+    - GPU acceleration for both face detection and recognition.
+- **Offline processing:** Implement a batch processing mode to process multiple videos or multiple frames at once.
+    - The tool can be extended to process multiple videos or frames in parallel, which would be useful for batch processing.
 - **Audio support:**  Add support for audio processing.
+    - Video clips with audio have lots of small issues that need to be figured out. From downloading from Youtube, to cropping the video, to merging the audio back in. The code for generating segments with audio support also has lots of space for improvement and optimization.
 - **Smoothing:** Implement a moving average to smooth the bounding box. (Done)
 - **Hyperparameter tuning:** The matching threshold for face recognition can be tuned. (how?)
 - **Refine README:** Go through the installation and usage instructions to ensure they are clear and concise.
 
 
 ## Clarifications
-- **Real-time vs. Quality:** The tool prioritizes processing quality over real-time performance.
-- **Face or Whole Head:** The tracker is designed to focus on the face specifically.
+- **Real-time vs. Quality:** The tool prioritizes processing quality over real-time performance. (For now)
+- **Face or Whole Head:** The tracker is designed to focus on the face specifically, excluding hair, neck, etc.
 - **Timestamps:** Timestamps in the metadata refer to frame indices, not absolute time.
-- Audio support?
+- **Audio support:**
 
 
 ## Features

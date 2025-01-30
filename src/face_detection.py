@@ -43,7 +43,7 @@ def detect_faces_in_video(video_path, output_folder="output", cascade_path="haar
         os.makedirs(output_folder)
 
     # Output video path
-    output_video_path = os.path.join(output_folder, "output_with_faces.mp4")
+    output_video_path = os.path.join(output_folder, "detection_output.mp4")
     out = cv2.VideoWriter(output_video_path, fourcc, fps, (frame_width, frame_height))
 
     # JSON file path
