@@ -2,6 +2,7 @@ import cv2
 import os
 import json
 import argparse
+from tqdm import tqdm
 from retinaface import RetinaFace
 
 def detect_faces_in_video(video_path, output_folder="output", cascade_path="haarcascade_frontalface_default.xml", algorithm="haar", debug=False):
@@ -36,6 +37,7 @@ def detect_faces_in_video(video_path, output_folder="output", cascade_path="haar
     frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = int(cap.get(cv2.CAP_PROP_FPS))
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for output video
 
     # Create output folder if it doesn't exist
@@ -52,43 +54,45 @@ def detect_faces_in_video(video_path, output_folder="output", cascade_path="haar
 
     frame_count = 0
 
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        frame_faces = []
-
-        if algorithm == "haar":
-            # Convert to grayscale for Haar Cascade face detection
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-            # Detect faces using Haar Cascade
-            faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
-            for (x, y, w, h) in faces:
-                frame_faces.append({"x": int(x), "y": int(y), "width": int(w), "height": int(h)})
-                if debug:
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-
-        elif algorithm == "retinaface":
-            # Detect faces using RetinaFace
-            detections = RetinaFace.detect_faces(frame)
-            for key in detections:
-                face = detections[key]['facial_area']
-                x, y, x1, y1 = face
-                frame_faces.append({"x": int(x), "y": int(y), "width": int(x1 - x), "height": int(y1 - y)})
-                if debug:
-                    cv2.rectangle(frame, (x, y), (x1, y1), (0, 255, 0), 2)
-
-        face_data.append({"frame": frame_count, "faces": frame_faces})
-        frame_count += 1
-        out.write(frame)
-
-        # Optionally display the frame (for debugging)
-        if debug:
-            cv2.imshow('Face Detection', frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+    # Process video frames with a progress bar
+    with tqdm(total=total_frames, desc="Processing Video", unit="frame") as pbar:
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
                 break
+
+            frame_faces = []
+
+            if algorithm == "haar":
+                # Convert to grayscale for Haar Cascade face detection
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+                # Detect faces using Haar Cascade
+                faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+                for (x, y, w, h) in faces:
+                    frame_faces.append({"x": int(x), "y": int(y), "width": int(w), "height": int(h)})
+                    if debug:
+                        cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+
+            elif algorithm == "retinaface":
+                # Detect faces using RetinaFace
+                detections = RetinaFace.detect_faces(frame)
+                for key in detections:
+                    face = detections[key]['facial_area']
+                    x, y, x1, y1 = face
+                    frame_faces.append({"x": int(x), "y": int(y), "width": int(x1 - x), "height": int(y1 - y)})
+                    if debug:
+                        cv2.rectangle(frame, (x, y), (x1, y1), (0, 255, 0), 2)
+
+            face_data.append({"frame": frame_count, "faces": frame_faces})
+            frame_count += 1
+            out.write(frame)
+            pbar.update(1)
+
+            if debug:
+                cv2.imshow('Face Detection', frame)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
 
     # Release resources
     cap.release()
