@@ -14,14 +14,16 @@ To set up the project, follow these steps:
     cd FaceTracker
    ```
 
-2. Create Conda environment and install dependencies:
+2. Make sure you have [Conda](https://docs.conda.io/en/latest/miniconda.html), CUDA, CUDNN, and FFmpeg installed on your system.
+
+3. Create Conda environment and install dependencies:
    ```bash
-    conda create -n FaceTracker python=3.12
+    conda create -n FaceTracker python=3.10
     conda activate FaceTracker
     pip install -r requirements.txt
    ```
 
-3. Ensure you have [Node.js](https://nodejs.org/en) installed if you wish to use `pytubefix` to download YouTube videos. For more details, see [this pull request](https://github.com/JuanBindez/pytubefix/pull/209).
+4. Ensure you have [Node.js](https://nodejs.org/en) installed if you wish to use `pytubefix` to download YouTube videos. For more details, see [this pull request](https://github.com/JuanBindez/pytubefix/pull/209).
 
 ## Data preparation
 Run
@@ -66,6 +68,8 @@ python src/face_recog.py --video_path ./sample_data/jensen_medium1.mp4 --face_co
    - GPU acceleration for both face detection and recognition.
 - **Audio support:**  Add support for audio processing.
 - **Smoothing:** Implement a moving average to smooth the bounding box. (Done)
+- **Hyperparameter tuning:** The matching threshold for face recognition can be tuned. (how?)
+- **Refine README:** Go through the installation and usage instructions to ensure they are clear and concise.
 
 
 ## Clarifications
