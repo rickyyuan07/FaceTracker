@@ -7,6 +7,7 @@ FaceTracker is a tool designed to detect, track, and crop a specific target face
 
 ## Installation
 This project is tested under WSL2, Ubuntu 22.04, and Python 3.10, NVIDIA RTX 3060 Ti. The CUDA vision is 12.6, and the CUDNN version is 9.7.0.
+
 To set up the project, follow these steps:
 
 1. Clone the repository:
