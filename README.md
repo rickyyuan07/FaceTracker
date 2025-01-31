@@ -3,7 +3,7 @@
 Take-home project for interviewing with HeyGen.
 
 ## Overview
-FaceTracker is a tool designed to detect, track, and crop a specific target face from a video. The tool extracts exact video clips of the target face, along with metadata, including timestamps and face bounding box coordinates for each frame.
+FaceTracker is a tool designed to detect, track, and crop a specific target face from a video. The tool extracts exact video clips of the target face, along with metadata, including timestamps and face bounding box coordinates for each frame. See [instruction](instructions.md) for more details.
 
 ## Installation
 This project is tested under WSL2, Ubuntu 22.04, and Python 3.10, NVIDIA RTX 3060 Ti. The CUDA vision is 12.6, and the CUDNN version is 9.7.0.
