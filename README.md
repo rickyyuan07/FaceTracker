@@ -1,6 +1,5 @@
-# FaceTracker
-
-Take-home project for interviewing with HeyGen.
+# FaceMatch
+A simple face Match and extractor tools
 
 ## Overview
 FaceTracker is a tool designed to detect, track, and crop a specific target face from a video. The tool extracts exact video clips of the target face, along with metadata, including timestamps and face bounding box coordinates for each frame. See [instruction](instructions.md) for more details.
